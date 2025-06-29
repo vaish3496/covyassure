@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Download, Globe, Copy, Check } from 'lucide-react';
+import { X, Download, Globe, Copy, Check, Menu, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -24,6 +24,7 @@ export default function DocumentViewer({
   const [viewMode, setViewMode] = useState<'single' | 'split'>('single');
   const [compareLanguage, setCompareLanguage] = useState('hi');
   const [copied, setCopied] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const availableLanguages = languages.filter(lang => 
     document.availableLanguages.includes(lang.code)
@@ -45,7 +46,7 @@ export default function DocumentViewer({
   return (
     <AnimatePresence>
       <motion.div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -53,7 +54,7 @@ export default function DocumentViewer({
         onClick={onClose}
       >
         <motion.div 
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-5/6 flex flex-col overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[95vh] sm:h-5/6 flex flex-col overflow-hidden"
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -61,131 +62,212 @@ export default function DocumentViewer({
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 sm:p-6 border-b border-gray-200 bg-gradient-to-r from-gray-50 to-white">
             <motion.div 
-              className="flex-1"
+              className="flex-1 mb-4 sm:mb-0"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
             >
-              <h2 className="text-xl font-bold text-gray-900 mb-1">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-1">
                 {document.title}
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-xs sm:text-sm text-gray-500">
                 Last modified: {new Date(document.lastModified).toLocaleDateString()}
               </p>
             </motion.div>
             
             <motion.div 
-              className="flex items-center space-x-4"
+              className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
             >
-              {/* View Mode Toggle */}
-              <div className="flex border border-gray-300 rounded-xl overflow-hidden shadow-sm">
+              {/* Mobile Menu Toggle */}
+              <div className="sm:hidden w-full">
                 <motion.button
-                  onClick={() => setViewMode('single')}
-                  className={`px-4 py-2 text-sm font-medium transition-all duration-300 ${
-                    viewMode === 'single' 
-                      ? 'bg-blue-600 text-white shadow-md' 
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  className="w-full flex items-center justify-between p-3 bg-gray-100 rounded-xl text-sm font-medium"
                   whileTap={{ scale: 0.95 }}
                 >
-                  Single View
+                  <span>Options</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showMobileMenu ? 'rotate-180' : ''}`} />
                 </motion.button>
-                <motion.button
-                  onClick={() => setViewMode('split')}
-                  className={`px-4 py-2 text-sm font-medium transition-all duration-300 ${
-                    viewMode === 'split' 
-                      ? 'bg-blue-600 text-white shadow-md' 
-                      : 'bg-white text-gray-700 hover:bg-gray-50'
-                  }`}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Compare
-                </motion.button>
-              </div>
-
-              {/* Language Selector */}
-              <select
-                value={selectedLanguage}
-                onChange={(e) => onLanguageChange(e.target.value)}
-                className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
-              >
-                {availableLanguages.map((language) => (
-                  <option key={language.code} value={language.code}>
-                    {language.flag} {language.name}
-                  </option>
-                ))}
-              </select>
-
-              {viewMode === 'split' && (
-                <motion.select
-                  value={compareLanguage}
-                  onChange={(e) => setCompareLanguage(e.target.value)}
-                  className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.3 }}
-                >
-                  {availableLanguages
-                    .filter(lang => lang.code !== selectedLanguage)
-                    .map((language) => (
-                      <option key={language.code} value={language.code}>
-                        {language.flag} {language.name}
-                      </option>
-                    ))}
-                </motion.select>
-              )}
-
-              <motion.button
-                onClick={handleCopy}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-300 shadow-sm"
-                title="Copy content"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <AnimatePresence mode="wait">
-                  {copied ? (
+                
+                <AnimatePresence>
+                  {showMobileMenu && (
                     <motion.div
-                      key="check"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-2 space-y-2"
                     >
-                      <Check className="w-5 h-5 text-green-500" />
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="copy"
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      exit={{ scale: 0 }}
-                    >
-                      <Copy className="w-5 h-5" />
+                      {/* View Mode Toggle */}
+                      <div className="flex border border-gray-300 rounded-xl overflow-hidden shadow-sm">
+                        <motion.button
+                          onClick={() => setViewMode('single')}
+                          className={`flex-1 px-3 py-2 text-xs font-medium transition-all duration-300 ${
+                            viewMode === 'single' 
+                              ? 'bg-blue-600 text-white shadow-md' 
+                              : 'bg-white text-gray-700 hover:bg-gray-50'
+                          }`}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Single
+                        </motion.button>
+                        <motion.button
+                          onClick={() => setViewMode('split')}
+                          className={`flex-1 px-3 py-2 text-xs font-medium transition-all duration-300 ${
+                            viewMode === 'split' 
+                              ? 'bg-blue-600 text-white shadow-md' 
+                              : 'bg-white text-gray-700 hover:bg-gray-50'
+                          }`}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          Compare
+                        </motion.button>
+                      </div>
+
+                      {/* Language Selectors */}
+                      <div className="space-y-2">
+                        <select
+                          value={selectedLanguage}
+                          onChange={(e) => onLanguageChange(e.target.value)}
+                          className="w-full border border-gray-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                        >
+                          {availableLanguages.map((language) => (
+                            <option key={language.code} value={language.code}>
+                              {language.flag} {language.name}
+                            </option>
+                          ))}
+                        </select>
+
+                        {viewMode === 'split' && (
+                          <motion.select
+                            value={compareLanguage}
+                            onChange={(e) => setCompareLanguage(e.target.value)}
+                            className="w-full border border-gray-300 rounded-xl px-3 py-2 text-xs focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {availableLanguages
+                              .filter(lang => lang.code !== selectedLanguage)
+                              .map((language) => (
+                                <option key={language.code} value={language.code}>
+                                  {language.flag} {language.name}
+                                </option>
+                              ))}
+                          </motion.select>
+                        )}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.button>
+              </div>
 
-              {/* <motion.button 
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-300 shadow-sm"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Download className="w-5 h-5" />
-              </motion.button> */}
+              {/* Desktop Controls */}
+              <div className="hidden sm:flex items-center space-x-4">
+                {/* View Mode Toggle */}
+                <div className="flex border border-gray-300 rounded-xl overflow-hidden shadow-sm">
+                  <motion.button
+                    onClick={() => setViewMode('single')}
+                    className={`px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                      viewMode === 'single' 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Single View
+                  </motion.button>
+                  <motion.button
+                    onClick={() => setViewMode('split')}
+                    className={`px-4 py-2 text-sm font-medium transition-all duration-300 ${
+                      viewMode === 'split' 
+                        ? 'bg-blue-600 text-white shadow-md' 
+                        : 'bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Compare
+                  </motion.button>
+                </div>
 
-              <motion.button
-                onClick={onClose}
-                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-300 shadow-sm"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <X className="w-5 h-5" />
-              </motion.button>
+                {/* Language Selector */}
+                <select
+                  value={selectedLanguage}
+                  onChange={(e) => onLanguageChange(e.target.value)}
+                  className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                >
+                  {availableLanguages.map((language) => (
+                    <option key={language.code} value={language.code}>
+                      {language.flag} {language.name}
+                    </option>
+                  ))}
+                </select>
+
+                {viewMode === 'split' && (
+                  <motion.select
+                    value={compareLanguage}
+                    onChange={(e) => setCompareLanguage(e.target.value)}
+                    className="border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    {availableLanguages
+                      .filter(lang => lang.code !== selectedLanguage)
+                      .map((language) => (
+                        <option key={language.code} value={language.code}>
+                          {language.flag} {language.name}
+                        </option>
+                      ))}
+                  </motion.select>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center space-x-2 sm:space-x-4">
+                <motion.button
+                  onClick={handleCopy}
+                  className="p-2 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-300 shadow-sm"
+                  title="Copy content"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <AnimatePresence mode="wait">
+                    {copied ? (
+                      <motion.div
+                        key="check"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                      >
+                        <Check className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="copy"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        exit={{ scale: 0 }}
+                      >
+                        <Copy className="w-4 h-4 sm:w-5 sm:h-5" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.button>
+
+                <motion.button
+                  onClick={onClose}
+                  className="p-2 sm:p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl transition-all duration-300 shadow-sm"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <X className="w-4 h-4 sm:w-5 sm:h-5" />
+                </motion.button>
+              </div>
             </motion.div>
           </div>
 
@@ -195,15 +277,15 @@ export default function DocumentViewer({
               {viewMode === 'single' ? (
                 <motion.div 
                   key="single"
-                  className="h-full p-6 overflow-y-auto"
+                  className="h-full p-3 sm:p-6 overflow-y-auto"
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
                   transition={{ duration: 0.3 }}
                 >
                   <div className="max-w-4xl mx-auto">
-                    <div className="prose prose-lg max-w-none">
-                      <div className="bg-gray-50 p-6 rounded-xl">
+                    <div className="prose prose-sm sm:prose-lg max-w-none">
+                      <div className="bg-gray-50 p-3 sm:p-6 rounded-xl">
                         <ReactMarkdown 
                           remarkPlugins={[remarkGfm]}
                           components={{
@@ -212,7 +294,7 @@ export default function DocumentViewer({
                               const isInline = !className?.includes('language-');
                               return (
                                 <code
-                                  className={`${className} ${isInline ? 'bg-gray-200 px-1 py-0.5 rounded text-sm' : 'block bg-gray-800 text-gray-100 p-4 rounded-lg overflow-x-auto'}`}
+                                  className={`${className} ${isInline ? 'bg-gray-200 px-1 py-0.5 rounded text-xs sm:text-sm' : 'block bg-gray-800 text-gray-100 p-2 sm:p-4 rounded-lg overflow-x-auto text-xs sm:text-sm'}`}
                                   {...props}
                                 >
                                   {children}
@@ -220,26 +302,26 @@ export default function DocumentViewer({
                               );
                             },
                             // Custom styling for headings
-                            h1: ({ children }: any) => <h1 className="text-3xl font-bold text-gray-900 mb-4">{children}</h1>,
-                            h2: ({ children }: any) => <h2 className="text-2xl font-bold text-gray-900 mb-3">{children}</h2>,
-                            h3: ({ children }: any) => <h3 className="text-xl font-bold text-gray-900 mb-2">{children}</h3>,
+                            h1: ({ children }: any) => <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">{children}</h1>,
+                            h2: ({ children }: any) => <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">{children}</h2>,
+                            h3: ({ children }: any) => <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{children}</h3>,
                             // Custom styling for lists
-                            ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-4">{children}</ul>,
-                            ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-4">{children}</ol>,
+                            ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-3 sm:mb-4">{children}</ul>,
+                            ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-3 sm:mb-4">{children}</ol>,
                             // Custom styling for links
                             a: ({ children, href }: any) => (
-                              <a href={href} className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer">
+                              <a href={href} className="text-blue-600 hover:text-blue-800 underline text-sm sm:text-base" target="_blank" rel="noopener noreferrer">
                                 {children}
                               </a>
                             ),
                             // Custom styling for tables
                             table: ({ children }: any) => (
-                              <div className="overflow-x-auto mb-4">
-                                <table className="min-w-full border border-gray-300">{children}</table>
+                              <div className="overflow-x-auto mb-3 sm:mb-4">
+                                <table className="min-w-full border border-gray-300 text-xs sm:text-sm">{children}</table>
                               </div>
                             ),
-                            th: ({ children }: any) => <th className="border border-gray-300 px-4 py-2 bg-gray-100 font-semibold">{children}</th>,
-                            td: ({ children }: any) => <td className="border border-gray-300 px-4 py-2">{children}</td>,
+                            th: ({ children }: any) => <th className="border border-gray-300 px-2 sm:px-4 py-1 sm:py-2 bg-gray-100 font-semibold">{children}</th>,
+                            td: ({ children }: any) => <td className="border border-gray-300 px-2 sm:px-4 py-1 sm:py-2">{children}</td>,
                           }}
                         >
                           {currentTranslation}
@@ -251,7 +333,7 @@ export default function DocumentViewer({
               ) : (
                 <motion.div 
                   key="split"
-                  className="h-full flex"
+                  className="h-full flex flex-col lg:flex-row"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -259,19 +341,19 @@ export default function DocumentViewer({
                 >
                   {/* Left Panel */}
                   <motion.div 
-                    className="flex-1 border-r border-gray-200"
+                    className="flex-1 border-b lg:border-b-0 lg:border-r border-gray-200"
                     initial={{ x: -50, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.1 }}
                   >
-                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-4 py-3 border-b border-gray-200">
-                      <h3 className="font-semibold text-gray-900">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                         {languages.find(l => l.code === selectedLanguage)?.flag}{' '}
                         {languages.find(l => l.code === selectedLanguage)?.name}
                       </h3>
                     </div>
-                    <div className="p-6 h-full overflow-y-auto">
-                      <div className="prose prose-sm max-w-none">
+                    <div className="p-3 sm:p-6 h-full overflow-y-auto">
+                      <div className="prose prose-xs sm:prose-sm max-w-none">
                         <ReactMarkdown 
                           remarkPlugins={[remarkGfm]}
                           components={{
@@ -279,30 +361,30 @@ export default function DocumentViewer({
                               const isInline = !className?.includes('language-');
                               return (
                                 <code
-                                  className={`${className} ${isInline ? 'bg-gray-200 px-1 py-0.5 rounded text-xs' : 'block bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-xs'}`}
+                                  className={`${className} ${isInline ? 'bg-gray-200 px-1 py-0.5 rounded text-xs' : 'block bg-gray-800 text-gray-100 p-2 sm:p-3 rounded-lg overflow-x-auto text-xs'}`}
                                   {...props}
                                 >
                                   {children}
                                 </code>
                               );
                             },
-                            h1: ({ children }: any) => <h1 className="text-2xl font-bold text-gray-900 mb-3">{children}</h1>,
-                            h2: ({ children }: any) => <h2 className="text-xl font-bold text-gray-900 mb-2">{children}</h2>,
-                            h3: ({ children }: any) => <h3 className="text-lg font-bold text-gray-900 mb-2">{children}</h3>,
-                            ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-3">{children}</ul>,
-                            ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-3">{children}</ol>,
+                            h1: ({ children }: any) => <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">{children}</h1>,
+                            h2: ({ children }: any) => <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{children}</h2>,
+                            h3: ({ children }: any) => <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">{children}</h3>,
+                            ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-2 sm:mb-3">{children}</ul>,
+                            ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-2 sm:mb-3">{children}</ol>,
                             a: ({ children, href }: any) => (
-                              <a href={href} className="text-blue-600 hover:text-blue-800 underline text-sm" target="_blank" rel="noopener noreferrer">
+                              <a href={href} className="text-blue-600 hover:text-blue-800 underline text-xs sm:text-sm" target="_blank" rel="noopener noreferrer">
                                 {children}
                               </a>
                             ),
                             table: ({ children }: any) => (
-                              <div className="overflow-x-auto mb-3">
-                                <table className="min-w-full border border-gray-300 text-sm">{children}</table>
+                              <div className="overflow-x-auto mb-2 sm:mb-3">
+                                <table className="min-w-full border border-gray-300 text-xs">{children}</table>
                               </div>
                             ),
-                            th: ({ children }: any) => <th className="border border-gray-300 px-3 py-1 bg-gray-100 font-semibold text-sm">{children}</th>,
-                            td: ({ children }: any) => <td className="border border-gray-300 px-3 py-1 text-sm">{children}</td>,
+                            th: ({ children }: any) => <th className="border border-gray-300 px-2 sm:px-3 py-1 bg-gray-100 font-semibold text-xs">{children}</th>,
+                            td: ({ children }: any) => <td className="border border-gray-300 px-2 sm:px-3 py-1 text-xs">{children}</td>,
                           }}
                         >
                           {currentTranslation}
@@ -318,14 +400,14 @@ export default function DocumentViewer({
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <div className="bg-gradient-to-r from-green-50 to-green-100 px-4 py-3 border-b border-gray-200">
-                      <h3 className="font-semibold text-gray-900">
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
+                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                         {languages.find(l => l.code === compareLanguage)?.flag}{' '}
                         {languages.find(l => l.code === compareLanguage)?.name}
                       </h3>
                     </div>
-                    <div className="p-6 h-full overflow-y-auto">
-                      <div className="prose prose-sm max-w-none">
+                    <div className="p-3 sm:p-6 h-full overflow-y-auto">
+                      <div className="prose prose-xs sm:prose-sm max-w-none">
                         <ReactMarkdown 
                           remarkPlugins={[remarkGfm]}
                           components={{
@@ -333,30 +415,30 @@ export default function DocumentViewer({
                               const isInline = !className?.includes('language-');
                               return (
                                 <code
-                                  className={`${className} ${isInline ? 'bg-gray-200 px-1 py-0.5 rounded text-xs' : 'block bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-xs'}`}
+                                  className={`${className} ${isInline ? 'bg-gray-200 px-1 py-0.5 rounded text-xs' : 'block bg-gray-800 text-gray-100 p-2 sm:p-3 rounded-lg overflow-x-auto text-xs'}`}
                                   {...props}
                                 >
                                   {children}
                                 </code>
                               );
                             },
-                            h1: ({ children }: any) => <h1 className="text-2xl font-bold text-gray-900 mb-3">{children}</h1>,
-                            h2: ({ children }: any) => <h2 className="text-xl font-bold text-gray-900 mb-2">{children}</h2>,
-                            h3: ({ children }: any) => <h3 className="text-lg font-bold text-gray-900 mb-2">{children}</h3>,
-                            ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-3">{children}</ul>,
-                            ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-3">{children}</ol>,
+                            h1: ({ children }: any) => <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">{children}</h1>,
+                            h2: ({ children }: any) => <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">{children}</h2>,
+                            h3: ({ children }: any) => <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">{children}</h3>,
+                            ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-2 sm:mb-3">{children}</ul>,
+                            ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-2 sm:mb-3">{children}</ol>,
                             a: ({ children, href }: any) => (
-                              <a href={href} className="text-blue-600 hover:text-blue-800 underline text-sm" target="_blank" rel="noopener noreferrer">
+                              <a href={href} className="text-blue-600 hover:text-blue-800 underline text-xs sm:text-sm" target="_blank" rel="noopener noreferrer">
                                 {children}
                               </a>
                             ),
                             table: ({ children }: any) => (
-                              <div className="overflow-x-auto mb-3">
-                                <table className="min-w-full border border-gray-300 text-sm">{children}</table>
+                              <div className="overflow-x-auto mb-2 sm:mb-3">
+                                <table className="min-w-full border border-gray-300 text-xs">{children}</table>
                               </div>
                             ),
-                            th: ({ children }: any) => <th className="border border-gray-300 px-3 py-1 bg-gray-100 font-semibold text-sm">{children}</th>,
-                            td: ({ children }: any) => <td className="border border-gray-300 px-3 py-1 text-sm">{children}</td>,
+                            th: ({ children }: any) => <th className="border border-gray-300 px-2 sm:px-3 py-1 bg-gray-100 font-semibold text-xs">{children}</th>,
+                            td: ({ children }: any) => <td className="border border-gray-300 px-2 sm:px-3 py-1 text-xs">{children}</td>,
                           }}
                         >
                           {compareTranslation}
