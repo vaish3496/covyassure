@@ -106,13 +106,13 @@ export default function DocumentCard({ document, languages, selectedLanguage, on
           <Eye className="w-4 h-4 mr-2" />
           View Document
         </motion.button>
-        <motion.button 
+        {/* <motion.button 
           className="px-4 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow-md"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
           <Download className="w-4 h-4" />
-        </motion.button>
+        </motion.button> */}
       </motion.div>
     </motion.div>
   );
