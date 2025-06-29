@@ -341,18 +341,18 @@ export default function DocumentViewer({
                 >
                   {/* Left Panel */}
                   <motion.div 
-                    className="flex-1 border-b lg:border-b-0 lg:border-r border-gray-200"
+                    className="h-1/2 lg:h-full lg:flex-1 border-b lg:border-b-0 lg:border-r border-gray-200 flex flex-col"
                     initial={{ x: -50, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.1 }}
                   >
-                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
+                    <div className="bg-gradient-to-r from-blue-50 to-blue-100 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200 flex-shrink-0">
                       <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                         {languages.find(l => l.code === selectedLanguage)?.flag}{' '}
                         {languages.find(l => l.code === selectedLanguage)?.name}
                       </h3>
                     </div>
-                    <div className="p-3 sm:p-6 h-full overflow-y-auto">
+                    <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-6">
                       <div className="prose prose-xs sm:prose-sm max-w-none">
                         <ReactMarkdown 
                           remarkPlugins={[remarkGfm]}
@@ -395,18 +395,18 @@ export default function DocumentViewer({
 
                   {/* Right Panel */}
                   <motion.div 
-                    className="flex-1"
+                    className="h-1/2 lg:h-full lg:flex-1 flex flex-col"
                     initial={{ x: 50, opacity: 0 }}
                     animate={{ x: 0, opacity: 1 }}
                     transition={{ delay: 0.2 }}
                   >
-                    <div className="bg-gradient-to-r from-green-50 to-green-100 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200">
+                    <div className="bg-gradient-to-r from-green-50 to-green-100 px-3 sm:px-4 py-2 sm:py-3 border-b border-gray-200 flex-shrink-0">
                       <h3 className="font-semibold text-gray-900 text-sm sm:text-base">
                         {languages.find(l => l.code === compareLanguage)?.flag}{' '}
                         {languages.find(l => l.code === compareLanguage)?.name}
                       </h3>
                     </div>
-                    <div className="p-3 sm:p-6 h-full overflow-y-auto">
+                    <div className="flex-1 min-h-0 overflow-y-auto p-3 sm:p-6">
                       <div className="prose prose-xs sm:prose-sm max-w-none">
                         <ReactMarkdown 
                           remarkPlugins={[remarkGfm]}
