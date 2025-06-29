@@ -6,7 +6,6 @@ export interface PolicyDocument {
   availableLanguages: string[];
   uploadDate: string;
   lastModified: string;
-  fileSize: string;
 }
 
 export interface Translation {

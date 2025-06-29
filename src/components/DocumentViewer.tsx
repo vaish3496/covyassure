@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { X, Download, Globe, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { PolicyDocument, Language } from '../types';
-import { mockTranslations } from '../data/mockData';
+import { mockTranslations } from '../data/prodData';
 
 interface DocumentViewerProps {
   document: PolicyDocument;
@@ -20,15 +22,15 @@ export default function DocumentViewer({
   onLanguageChange 
 }: DocumentViewerProps) {
   const [viewMode, setViewMode] = useState<'single' | 'split'>('single');
-  const [compareLanguage, setCompareLanguage] = useState('es');
+  const [compareLanguage, setCompareLanguage] = useState('hi');
   const [copied, setCopied] = useState(false);
 
   const availableLanguages = languages.filter(lang => 
     document.availableLanguages.includes(lang.code)
   );
 
-  const currentTranslation = mockTranslations['1']?.[selectedLanguage] || 'Translation not available for this language.';
-  const compareTranslation = mockTranslations['1']?.[compareLanguage] || 'Translation not available for this language.';
+  const currentTranslation = mockTranslations['1']?.[selectedLanguage as keyof typeof mockTranslations['1']] || 'Translation not available for this language.';
+  const compareTranslation = mockTranslations['1']?.[compareLanguage as keyof typeof mockTranslations['1']] || 'Translation not available for this language.';
 
   const handleCopy = async () => {
     try {
@@ -201,8 +203,47 @@ export default function DocumentViewer({
                 >
                   <div className="max-w-4xl mx-auto">
                     <div className="prose prose-lg max-w-none">
-                      <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed bg-gray-50 p-6 rounded-xl">
-                        {currentTranslation}
+                      <div className="bg-gray-50 p-6 rounded-xl">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            // Custom styling for code blocks
+                            code: ({ className, children, ...props }: any) => {
+                              const isInline = !className?.includes('language-');
+                              return (
+                                <code
+                                  className={`${className} ${isInline ? 'bg-gray-200 px-1 py-0.5 rounded text-sm' : 'block bg-gray-800 text-gray-100 p-4 rounded-lg overflow-x-auto'}`}
+                                  {...props}
+                                >
+                                  {children}
+                                </code>
+                              );
+                            },
+                            // Custom styling for headings
+                            h1: ({ children }: any) => <h1 className="text-3xl font-bold text-gray-900 mb-4">{children}</h1>,
+                            h2: ({ children }: any) => <h2 className="text-2xl font-bold text-gray-900 mb-3">{children}</h2>,
+                            h3: ({ children }: any) => <h3 className="text-xl font-bold text-gray-900 mb-2">{children}</h3>,
+                            // Custom styling for lists
+                            ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-4">{children}</ul>,
+                            ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-4">{children}</ol>,
+                            // Custom styling for links
+                            a: ({ children, href }: any) => (
+                              <a href={href} className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer">
+                                {children}
+                              </a>
+                            ),
+                            // Custom styling for tables
+                            table: ({ children }: any) => (
+                              <div className="overflow-x-auto mb-4">
+                                <table className="min-w-full border border-gray-300">{children}</table>
+                              </div>
+                            ),
+                            th: ({ children }: any) => <th className="border border-gray-300 px-4 py-2 bg-gray-100 font-semibold">{children}</th>,
+                            td: ({ children }: any) => <td className="border border-gray-300 px-4 py-2">{children}</td>,
+                          }}
+                        >
+                          {currentTranslation}
+                        </ReactMarkdown>
                       </div>
                     </div>
                   </div>
@@ -231,9 +272,41 @@ export default function DocumentViewer({
                     </div>
                     <div className="p-6 h-full overflow-y-auto">
                       <div className="prose prose-sm max-w-none">
-                        <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            code: ({ className, children, ...props }: any) => {
+                              const isInline = !className?.includes('language-');
+                              return (
+                                <code
+                                  className={`${className} ${isInline ? 'bg-gray-200 px-1 py-0.5 rounded text-xs' : 'block bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-xs'}`}
+                                  {...props}
+                                >
+                                  {children}
+                                </code>
+                              );
+                            },
+                            h1: ({ children }: any) => <h1 className="text-2xl font-bold text-gray-900 mb-3">{children}</h1>,
+                            h2: ({ children }: any) => <h2 className="text-xl font-bold text-gray-900 mb-2">{children}</h2>,
+                            h3: ({ children }: any) => <h3 className="text-lg font-bold text-gray-900 mb-2">{children}</h3>,
+                            ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-3">{children}</ul>,
+                            ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-3">{children}</ol>,
+                            a: ({ children, href }: any) => (
+                              <a href={href} className="text-blue-600 hover:text-blue-800 underline text-sm" target="_blank" rel="noopener noreferrer">
+                                {children}
+                              </a>
+                            ),
+                            table: ({ children }: any) => (
+                              <div className="overflow-x-auto mb-3">
+                                <table className="min-w-full border border-gray-300 text-sm">{children}</table>
+                              </div>
+                            ),
+                            th: ({ children }: any) => <th className="border border-gray-300 px-3 py-1 bg-gray-100 font-semibold text-sm">{children}</th>,
+                            td: ({ children }: any) => <td className="border border-gray-300 px-3 py-1 text-sm">{children}</td>,
+                          }}
+                        >
                           {currentTranslation}
-                        </div>
+                        </ReactMarkdown>
                       </div>
                     </div>
                   </motion.div>
@@ -253,9 +326,41 @@ export default function DocumentViewer({
                     </div>
                     <div className="p-6 h-full overflow-y-auto">
                       <div className="prose prose-sm max-w-none">
-                        <div className="whitespace-pre-wrap font-mono text-sm leading-relaxed">
+                        <ReactMarkdown 
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            code: ({ className, children, ...props }: any) => {
+                              const isInline = !className?.includes('language-');
+                              return (
+                                <code
+                                  className={`${className} ${isInline ? 'bg-gray-200 px-1 py-0.5 rounded text-xs' : 'block bg-gray-800 text-gray-100 p-3 rounded-lg overflow-x-auto text-xs'}`}
+                                  {...props}
+                                >
+                                  {children}
+                                </code>
+                              );
+                            },
+                            h1: ({ children }: any) => <h1 className="text-2xl font-bold text-gray-900 mb-3">{children}</h1>,
+                            h2: ({ children }: any) => <h2 className="text-xl font-bold text-gray-900 mb-2">{children}</h2>,
+                            h3: ({ children }: any) => <h3 className="text-lg font-bold text-gray-900 mb-2">{children}</h3>,
+                            ul: ({ children }: any) => <ul className="list-disc list-inside space-y-1 mb-3">{children}</ul>,
+                            ol: ({ children }: any) => <ol className="list-decimal list-inside space-y-1 mb-3">{children}</ol>,
+                            a: ({ children, href }: any) => (
+                              <a href={href} className="text-blue-600 hover:text-blue-800 underline text-sm" target="_blank" rel="noopener noreferrer">
+                                {children}
+                              </a>
+                            ),
+                            table: ({ children }: any) => (
+                              <div className="overflow-x-auto mb-3">
+                                <table className="min-w-full border border-gray-300 text-sm">{children}</table>
+                              </div>
+                            ),
+                            th: ({ children }: any) => <th className="border border-gray-300 px-3 py-1 bg-gray-100 font-semibold text-sm">{children}</th>,
+                            td: ({ children }: any) => <td className="border border-gray-300 px-3 py-1 text-sm">{children}</td>,
+                          }}
+                        >
                           {compareTranslation}
-                        </div>
+                        </ReactMarkdown>
                       </div>
                     </div>
                   </motion.div>

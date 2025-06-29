@@ -59,10 +59,10 @@ export default function DocumentCard({ document, languages, selectedLanguage, on
               <Calendar className="w-4 h-4 mr-1" />
               {new Date(document.lastModified).toLocaleDateString()}
             </div>
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <FileText className="w-4 h-4 mr-1" />
               {document.fileSize}
-            </div>
+            </div> */}
           </motion.div>
           
           <motion.div 

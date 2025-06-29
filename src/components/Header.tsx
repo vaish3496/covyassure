@@ -96,7 +96,7 @@ export default function Header({
           </motion.div>
 
           {/* Language Selector */}
-          <motion.div 
+          {/* <motion.div 
             className="flex items-center space-x-4"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -116,7 +116,7 @@ export default function Header({
               </select>
               <Globe className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
             </div>
-          </motion.div>
+          </motion.div> */}
         </div>
       </div>
     </motion.header>

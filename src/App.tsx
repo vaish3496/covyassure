@@ -6,7 +6,7 @@ import DocumentCard from './components/DocumentCard';
 import DocumentViewer from './components/DocumentViewer';
 import SearchResults from './components/SearchResults';
 import { PolicyDocument } from './types';
-import { languages, mockDocuments, companies } from './data/mockData';
+import { languages, mockDocuments, companies } from './data/prodData';
 
 function App() {
   const [selectedLanguage, setSelectedLanguage] = useState('en');
